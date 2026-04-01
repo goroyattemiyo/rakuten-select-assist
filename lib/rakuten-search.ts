@@ -1,6 +1,6 @@
 import { ProductCandidate, SearchParams } from '@/lib/types';
 
-const BASE_URL = 'https://app.rakuten.co.jp/services/api/IchibaItem/Search/20220601';
+const BASE_URL = 'https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601';
 
 function buildKeyword(params: SearchParams): string {
   const values = [params.genre, params.keyword]
@@ -13,6 +13,7 @@ function buildKeyword(params: SearchParams): string {
 function buildQuery(params: SearchParams): URLSearchParams {
   const query = new URLSearchParams({
     applicationId: process.env.RAKUTEN_APPLICATION_ID ?? '',
+    accessKey: process.env.RAKUTEN_ACCESS_KEY ?? '',
     format: 'json',
     formatVersion: '2',
     hits: '20',
@@ -42,18 +43,24 @@ export async function searchRakutenItemsV2(params: SearchParams): Promise<Produc
   const response = await fetch(`${BASE_URL}?${buildQuery(params).toString()}`, {
     method: 'GET',
     cache: 'no-store',
+    headers: {
+      'Origin': 'https://example.com',
+      'Referer': 'https://example.com/',
+    },
   });
 
   if (!response.ok) {
-    throw new Error(`Rakuten API request failed with status ${response.status}`);
+    const body = await response.text();
+    throw new Error(`Rakuten API request failed: ${response.status} ${body}`);
   }
 
-  const data = (await response.json()) as {
+  const data = await response.json() as {
     Items?: Array<{
       itemCode: string;
       itemName: string;
       itemPrice: number;
       mediumImageUrls?: string[];
+      affiliateUrl?: string;
       itemUrl: string;
       shopName?: string;
       reviewCount?: number;
@@ -66,7 +73,7 @@ export async function searchRakutenItemsV2(params: SearchParams): Promise<Produc
     name: item.itemName,
     price: item.itemPrice,
     imageUrl: item.mediumImageUrls?.[0] ?? '',
-    itemUrl: item.itemUrl,
+    itemUrl: item.affiliateUrl ?? item.itemUrl,
     shopName: item.shopName,
     reviewCount: item.reviewCount,
     reviewAverage: item.reviewAverage,

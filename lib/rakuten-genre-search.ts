@@ -1,10 +1,11 @@
 import { ProductCandidate } from '@/lib/types';
 
-const BASE_URL = 'https://app.rakuten.co.jp/services/api/IchibaItem/Search/20220601';
+const BASE_URL = 'https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601';
 
 function buildQuery(genreId: number, keyword?: string): URLSearchParams {
   const query = new URLSearchParams({
     applicationId: process.env.RAKUTEN_APPLICATION_ID ?? '',
+    accessKey: process.env.RAKUTEN_ACCESS_KEY ?? '',
     format: 'json',
     formatVersion: '2',
     hits: '20',
@@ -14,7 +15,6 @@ function buildQuery(genreId: number, keyword?: string): URLSearchParams {
     field: '1',
     sort: '-reviewCount',
     genreId: String(genreId),
-    elements: 'itemName,itemPrice,itemUrl,affiliateUrl,mediumImageUrls,shopName,reviewCount,reviewAverage,itemCode',
   });
 
   if (process.env.RAKUTEN_AFFILIATE_ID) {
@@ -41,6 +41,10 @@ export async function searchRakutenItemsByGenreId(params: {
   const response = await fetch(`${BASE_URL}?${buildQuery(params.genreId, params.keyword).toString()}`, {
     method: 'GET',
     cache: 'no-store',
+    headers: {
+      'Origin': 'https://example.com',
+      'Referer': 'https://example.com/',
+    },
   });
 
   if (!response.ok) {
@@ -48,13 +52,13 @@ export async function searchRakutenItemsByGenreId(params: {
     throw new Error(`Rakuten API request failed: ${response.status} ${body}`);
   }
 
-  const data = (await response.json()) as {
+  const data = await response.json() as {
     Items?: Array<{
       itemCode: string;
       itemName: string;
       itemPrice: number;
-      affiliateUrl?: string;
       mediumImageUrls?: string[];
+      affiliateUrl?: string;
       itemUrl: string;
       shopName?: string;
       reviewCount?: number;
