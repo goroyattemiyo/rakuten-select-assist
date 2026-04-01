@@ -44,7 +44,8 @@ export async function searchRakutenItemsByGenreId(params: {
   });
 
   if (!response.ok) {
-    throw new Error(`Rakuten API request failed with status ${response.status}`);
+    const body = await response.text();
+    throw new Error(`Rakuten API request failed: ${response.status} ${body}`);
   }
 
   const data = (await response.json()) as {
