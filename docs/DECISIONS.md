@@ -1,41 +1,58 @@
 # DECISIONS
 
-## D-001: 初期プロダクトはWebアプリとして開始する
-- 日付: 2026-03-31
-- 背景: AndroidアプリとWebアプリのどちらから始めるかを検討した
-- 選択肢:
-  - Androidアプリから始める
-  - Webアプリから始める
-- 決定:
-  - Webアプリから開始する
-- 理由:
-  - GitHub管理と相性が良い
-  - APIキーをサーバー側で扱いやすい
-  - MVP検証が速い
-  - 初期の本質はUIより商品選定ロジック
+## 2026-04-02: 楽天API新エンドポイント移行
 
-## D-002: 初期スコープは楽天市場の商品選定支援に限定する
-- 日付: 2026-03-31
-- 背景: 楽天市場と楽天トラベルの両対応を初期から行うかを検討した
-- 選択肢:
-  - 両方同時に対応
-  - 楽天市場に限定
-- 決定:
-  - 楽天市場に限定
-- 理由:
-  - 対象ユーザーの悩みに直結する
-  - MVPとして分かりやすい
-  - UIと選定ロジックを単純化できる
+### 背景
+楽天ウェブサービスが2026年2月10日より新APIへの移行を開始。
+旧ドメイン（app.rakuten.co.jp）は2026年5月14日に完全停止予定。
+移行期間は2026年2月10日〜5月13日。
 
-## D-003: AI APIは初期必須にしない
-- 日付: 2026-03-31
-- 背景: 商品選定支援にAI APIが初期から必要かを検討した
-- 選択肢:
-  - 初期から導入
-  - 後から導入
-- 決定:
-  - 後から導入
-- 理由:
-  - コア価値は候補の絞り込み
-  - まずは楽天APIとルールベースで成立する
-  - コストと複雑性を抑えられる
+### 問題の経緯
+
+#### 最初の症状
+- `app.rakuten.co.jp` の旧エンドポイントで `400 wrong_parameter` が返り続けた
+- Application IDが `UUID形式` であることを疑い、何度も確認したが正常だった
+
+#### 試みたこと（失敗）
+1. Application IDをAccess Keyに変えて送信 → 同じ400エラー
+2. Application URLを `http://localhost:3000` に変更 → 変化なし
+3. 新アプリを作成して新しいApplication IDを取得 → 同じ400エラー
+4. `Referer` ヘッダーを追加 → 403に変わったが解決せず
+5. 新エンドポイント（openapi.rakuten.co.jp）に切り替え → 403 `REQUEST_CONTEXT_BODY_HTTP_REFERRER_MISSING`
+6. `Referer` ヘッダーを小文字に変更 → 変化なし
+7. ブラウザで直接新エンドポイントにアクセス → 同じ403
+
+#### 解決のきっかけ
+- 楽天APIテストフォームで成功したURLを確認し、新エンドポイントと `accessKey` が必要と判明
+- 他の開発者の記事から `Origin` ヘッダーが必要と判明
+
+#### 根本原因
+- 旧APIは2026年2月以降、UUID形式のApplication IDを受け付けなくなっていた
+- 新APIは `applicationId` + `accessKey` の両方が必須
+- サーバーサイドからのリクエストでも `Origin` ヘッダーを付けないと403になる
+- `Referer` だけでは不十分で `Origin` が必須だった
+
+### 決定事項
+- エンドポイントを新ドメインへ移行する
+  - 旧: `https://app.rakuten.co.jp/services/api/IchibaItem/Search/20220601`
+  - 新: `https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601`
+- 認証に `applicationId` に加えて `accessKey` が必須
+- リクエストヘッダーに `Origin` と `Referer` を付ける
+  - 値は楽天管理画面の「Allowed websites」に登録したドメインを指定する
+- `mediumImageUrls` のレスポンス型が変わった
+  - 旧: `Array<{ imageUrl: string }>`（オブジェクト配列）
+  - 新: `string[]`（文字列配列）
+
+### 影響ファイル
+- `lib/rakuten.ts`
+- `.env.local`（`RAKUTEN_ACCESS_KEY` を追加）
+
+### 環境変数
+- `RAKUTEN_APPLICATION_ID`: UUID形式のアプリID
+- `RAKUTEN_ACCESS_KEY`: アクセスキー
+- `RAKUTEN_AFFILIATE_ID`: アフィリエイトID
+
+### 今後の注意点
+- Vercelデプロイ時は環境変数に `RAKUTEN_ACCESS_KEY` を追加すること
+- `Origin` ヘッダーの値は本番では本番ドメインに変更すること
+- `lib/rakuten-genre-search.ts` と `lib/rakuten-search.ts` も同様の修正が必要
