@@ -2,6 +2,16 @@ import { ProductCandidate } from '@/lib/types';
 
 const BASE_URL = 'https://app.rakuten.co.jp/services/api/IchibaItem/Search/20220601';
 
+console.log('ENV CHECK', {
+  hasAppId: Boolean(process.env.RAKUTEN_APPLICATION_ID),
+  appIdHead: process.env.RAKUTEN_APPLICATION_ID?.slice(0, 6),
+  appIdLen: process.env.RAKUTEN_APPLICATION_ID?.length,
+  hasAccessKey: Boolean(process.env.RAKUTEN_ACCESS_KEY),
+  accessKeyHead: process.env.RAKUTEN_ACCESS_KEY?.slice(0, 6),
+  accessKeyLen: process.env.RAKUTEN_ACCESS_KEY?.length,
+  hasAffiliateId: Boolean(process.env.RAKUTEN_AFFILIATE_ID),
+});
+
 function buildQuery(genreId: number, keyword?: string): URLSearchParams {
   const query = new URLSearchParams({
     applicationId: process.env.RAKUTEN_APPLICATION_ID ?? '',
