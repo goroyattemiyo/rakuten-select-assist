@@ -5,6 +5,7 @@ const BASE_URL = 'https://app.rakuten.co.jp/services/api/IchibaItem/Search/20220
 function buildQuery(genreId: number, keyword?: string): URLSearchParams {
   const query = new URLSearchParams({
     applicationId: process.env.RAKUTEN_APPLICATION_ID ?? '',
+    accessKey: process.env.RAKUTEN_ACCESS_KEY ?? '',
     format: 'json',
     formatVersion: '2',
     hits: '20',
@@ -33,9 +34,14 @@ export async function searchRakutenItemsByGenreId(params: {
   keyword?: string;
 }): Promise<ProductCandidate[]> {
   const applicationId = process.env.RAKUTEN_APPLICATION_ID;
+  const accessKey = process.env.RAKUTEN_ACCESS_KEY;
 
   if (!applicationId) {
     throw new Error('RAKUTEN_APPLICATION_ID is not set.');
+  }
+
+  if (!accessKey) {
+    throw new Error('RAKUTEN_ACCESS_KEY is not set.');
   }
 
   const response = await fetch(`${BASE_URL}?${buildQuery(params.genreId, params.keyword).toString()}`, {
@@ -44,7 +50,8 @@ export async function searchRakutenItemsByGenreId(params: {
   });
 
   if (!response.ok) {
-    throw new Error(`Rakuten API request failed with status ${response.status}`);
+    const body = await response.text();
+    throw new Error(`Rakuten API request failed: ${response.status} ${body}`);
   }
 
   const data = (await response.json()) as {
