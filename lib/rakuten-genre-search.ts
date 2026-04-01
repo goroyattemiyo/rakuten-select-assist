@@ -33,14 +33,9 @@ export async function searchRakutenItemsByGenreId(params: {
   keyword?: string;
 }): Promise<ProductCandidate[]> {
   const applicationId = process.env.RAKUTEN_APPLICATION_ID;
-  const accessKey = process.env.RAKUTEN_ACCESS_KEY;
 
   if (!applicationId) {
     throw new Error('RAKUTEN_APPLICATION_ID is not set.');
-  }
-
-  if (!accessKey) {
-    throw new Error('RAKUTEN_ACCESS_KEY is not set.');
   }
 
   const response = await fetch(`${BASE_URL}?${buildQuery(params.genreId, params.keyword).toString()}`, {
