@@ -23,10 +23,10 @@ export default function SavedPage() {
         <h1 className="text-lg font-bold text-[#8b5e34] tracking-tight">保存済み候補</h1>
         <button
           type="button"
-          onClick={() => router.push('/')}
-          className="text-sm font-bold text-[#8b5e34] border border-[#8b5e34] px-4 py-2 rounded-full"
+          onClick={() => router.back()}
+          className="text-sm font-bold text-[#8b5e34] border border-[#8b5e34] px-4 py-2 rounded-full transition-all active:scale-95 active:bg-[#8b5e34] active:text-white"
         >
-          検索に戻る
+          候補に戻る
         </button>
       </header>
 
@@ -36,10 +36,10 @@ export default function SavedPage() {
             <p className="text-[#50443b] font-medium">保存済みの候補はありません。</p>
             <button
               type="button"
-              onClick={() => router.push('/')}
+              onClick={() => router.back()}
               className="mt-4 text-sm font-bold text-[#8b5e34] underline"
             >
-              商品を探す
+              候補に戻る
             </button>
           </div>
         )}
@@ -52,18 +52,17 @@ export default function SavedPage() {
               <p className="text-xs text-[#83746a] mb-4">{new Date(item.savedAt).toLocaleDateString('ja-JP')}</p>
               <div className="flex gap-3">
                 
-                  <a
                   href={item.itemUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 text-white font-bold py-3 rounded-xl text-sm text-center block"
+                  className="flex-1 text-white font-bold py-3 rounded-xl text-sm text-center block transition-all active:scale-95"
                   style={{background: "linear-gradient(135deg, #c17f3e 0%, #8b5e34 50%, #6f461f 100%)"}}>
                   楽天で確認する
                 </a>
                 <button
                   type="button"
                   onClick={() => handleRemove(item.id)}
-                  className="flex-1 bg-[#eae8e5] text-[#1b1c1a] font-bold py-3 rounded-xl text-sm"
+                  className="flex-1 bg-[#eae8e5] text-[#1b1c1a] font-bold py-3 rounded-xl text-sm transition-all active:scale-95"
                 >
                   削除する
                 </button>
