@@ -26,7 +26,7 @@ export default function HomePage() {
       <header className="fixed top-0 w-full z-50 flex items-center justify-between px-6 h-16 backdrop-blur-md" style={{background: "rgba(255,248,240,0.85)"}}>
         <div className="flex items-center gap-2">
           <Image src="/icon.png" alt="icon" width={28} height={28} className="rounded-lg" />
-          <h1 className="text-lg font-bold text-[#8b5e34] tracking-tight">Rakuten Select</h1>
+          <h1 className="text-lg font-bold text-[#8b5e34] tracking-tight">Rakuten Select Assist</h1>
         </div>
       </header>
 
