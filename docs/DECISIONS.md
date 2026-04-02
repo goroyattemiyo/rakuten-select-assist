@@ -56,3 +56,30 @@
 - Vercelデプロイ時は環境変数に `RAKUTEN_ACCESS_KEY` を追加すること
 - `Origin` ヘッダーの値は本番では本番ドメインに変更すること
 - `lib/rakuten-genre-search.ts` と `lib/rakuten-search.ts` も同様の修正が必要
+
+---
+
+## 2026-04-02: MVP完成・旧ファイル整理
+
+### 完了した作業
+- Stitch（Google）でデザイン生成・Next.jsに適用
+- Tailwind v4導入（@tailwindcss/postcss）
+- warm glowグラデーション背景
+- 保存機能（localStorage）実装
+- 投稿文生成・コピー機能実装
+- Vercelデプロイ完了
+- 旧ページ4件削除
+- 旧APIファイル3件 + reason.ts 削除
+
+### 技術判断
+- 投稿文URLは非表示にして「プロフィールから」に変更（SNS投稿の慣習に合わせた）
+- 保存データ型にreviewCount/reviewAverageを追加
+- useSearchParamsはSuspenseでラップ必須（Next.js App Router）
+
+### 現在のファイル構成（lib/）
+- rakuten-unified.ts: 楽天API統合クライアント
+- saved-items.ts: localStorage保存管理
+- post-generator.ts: 投稿文生成
+- scoring.ts: スコアリング
+- types.ts: 型定義
+- genre-catalog.ts: ジャンル一覧
