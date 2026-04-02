@@ -5,10 +5,23 @@ import { useRouter } from 'next/navigation';
 import { getSavedItems, removeItem, SavedItem } from '@/lib/saved-items';
 import { generatePostText } from '@/lib/post-generator';
 
+type Tone = 'casual' | 'polite';
+
+interface GeneratedTexts {
+  [itemId: string]: string;
+}
+
+interface GeneratingIds {
+  [itemId: string]: boolean;
+}
+
 export default function SavedPage() {
   const router = useRouter();
   const [items, setItems] = useState<SavedItem[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [tone, setTone] = useState<Tone>('casual');
+  const [generatedTexts, setGeneratedTexts] = useState<GeneratedTexts>({});
+  const [generatingIds, setGeneratingIds] = useState<GeneratingIds>({});
 
   useEffect(() => {
     setItems(getSavedItems());
@@ -17,14 +30,54 @@ export default function SavedPage() {
   function handleRemove(id: string) {
     removeItem(id);
     setItems(getSavedItems());
+    setGeneratedTexts((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  }
+
+  function getPostText(item: SavedItem): string {
+    return generatedTexts[item.id] ?? generatePostText(item);
   }
 
   function handleCopy(item: SavedItem) {
-    const text = generatePostText(item);
+    const text = getPostText(item);
     navigator.clipboard.writeText(text).then(() => {
       setCopiedId(item.id);
       setTimeout(() => setCopiedId(null), 2000);
     });
+  }
+
+  async function handleGenerate(item: SavedItem) {
+    if (generatingIds[item.id]) return;
+
+    setGeneratingIds((prev) => ({ ...prev, [item.id]: true }));
+
+    try {
+      const res = await fetch('/api/generate-post', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: item.name,
+          price: item.price,
+          reviewCount: item.reviewCount,
+          reviewAverage: item.reviewAverage,
+          tone,
+        }),
+      });
+
+      if (!res.ok) throw new Error('generation failed');
+
+      const data = await res.json();
+      if (data.text) {
+        setGeneratedTexts((prev) => ({ ...prev, [item.id]: data.text }));
+      }
+    } catch {
+      // フォールバック：テンプレート文をそのまま使用
+    } finally {
+      setGeneratingIds((prev) => ({ ...prev, [item.id]: false }));
+    }
   }
 
   return (
@@ -44,6 +97,34 @@ export default function SavedPage() {
       </header>
 
       <main className="pt-24 pb-32 px-6 max-w-2xl mx-auto">
+        {items.length > 0 && (
+          <div className="flex items-center gap-3 mb-6">
+            <span className="text-sm font-medium text-[#50443b]">文体：</span>
+            <button
+              type="button"
+              onClick={() => setTone('casual')}
+              className="text-sm font-bold px-4 py-2 rounded-full transition-all"
+              style={{
+                background: tone === 'casual' ? 'linear-gradient(135deg, #c17f3e 0%, #8b5e34 100%)' : '#f6f3f0',
+                color: tone === 'casual' ? 'white' : '#50443b',
+              }}
+            >
+              カジュアル
+            </button>
+            <button
+              type="button"
+              onClick={() => setTone('polite')}
+              className="text-sm font-bold px-4 py-2 rounded-full transition-all"
+              style={{
+                background: tone === 'polite' ? 'linear-gradient(135deg, #c17f3e 0%, #8b5e34 100%)' : '#f6f3f0',
+                color: tone === 'polite' ? 'white' : '#50443b',
+              }}
+            >
+              丁寧
+            </button>
+          </div>
+        )}
+
         {items.length === 0 && (
           <div className="bg-white rounded-xl p-6 text-center">
             <p className="text-[#50443b] font-medium">保存済みの候補はありません。</p>
@@ -76,8 +157,31 @@ export default function SavedPage() {
                 <p className="text-xs text-[#83746a]">{new Date(item.savedAt).toLocaleDateString('ja-JP')}</p>
               </div>
 
-              <div className="bg-[#f6f3f0] rounded-xl p-4 mb-4 text-sm text-[#50443b] whitespace-pre-wrap leading-relaxed">
-                {generatePostText(item)}
+              <div className="relative bg-[#f6f3f0] rounded-xl p-4 mb-4 text-sm text-[#50443b] whitespace-pre-wrap leading-relaxed min-h-[80px]">
+                {generatingIds[item.id] ? (
+                  <div className="flex items-center gap-2 text-[#8b5e34]">
+                    <span className="animate-pulse">✨ AI生成中...</span>
+                  </div>
+                ) : (
+                  getPostText(item)
+                )}
+              </div>
+
+              <div className="flex gap-2 mb-3">
+                <button
+                  type="button"
+                  onClick={() => handleGenerate(item)}
+                  disabled={generatingIds[item.id]}
+                  className="flex-1 font-bold py-3 rounded-xl text-sm transition-all active:scale-95 border"
+                  style={{
+                    borderColor: '#c17f3e',
+                    color: generatingIds[item.id] ? '#c8b49a' : '#c17f3e',
+                    background: 'white',
+                    cursor: generatingIds[item.id] ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  {generatingIds[item.id] ? '生成中...' : '✨ AIで生成'}
+                </button>
               </div>
 
               <div className="flex gap-3">
