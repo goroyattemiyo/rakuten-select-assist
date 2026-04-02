@@ -68,7 +68,8 @@ export default function SavedPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 text-white font-bold py-3 rounded-xl text-sm text-center block transition-all active:scale-95"
-                  style={{background: "linear-gradient(135deg, #c17f3e 0%, #8b5e34 50%, #6f461f 100%)"}}>
+                  style={{background: "linear-gradient(135deg, #c17f3e 0%, #8b5e34 50%, #6f461f 100%)"}}
+                >
                   楽天で確認する
                 </a>
                 <button
