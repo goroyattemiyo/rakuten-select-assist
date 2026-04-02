@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -23,7 +24,10 @@ export default function HomePage() {
   return (
     <div className="min-h-screen font-[Manrope,sans-serif]" style={{background: "linear-gradient(135deg, #fff8f0 0%, #fef3e2 40%, #fde8c8 100%)"}}>
       <header className="fixed top-0 w-full z-50 flex items-center justify-between px-6 h-16 backdrop-blur-md" style={{background: "rgba(255,248,240,0.85)"}}>
-        <h1 className="text-lg font-bold text-[#8b5e34] tracking-tight">Rakuten Select</h1>
+        <div className="flex items-center gap-2">
+          <Image src="/icon.png" alt="icon" width={28} height={28} className="rounded-lg" />
+          <h1 className="text-lg font-bold text-[#8b5e34] tracking-tight">Rakuten Select</h1>
+        </div>
       </header>
 
       <main className="pt-24 pb-32 px-6 max-w-2xl mx-auto">
