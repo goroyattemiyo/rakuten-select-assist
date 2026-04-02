@@ -107,6 +107,7 @@ function ResultsContent() {
                 {item.score !== undefined && <span className="text-base font-bold px-3 py-1 rounded-full" style={{background: "linear-gradient(135deg, #c17f3e, #8b5e34)", color: "white"}}>総合 {item.score}</span>}
                 {item.priceScore !== undefined && <span className="text-sm px-3 py-1 rounded-full bg-[#f6f3f0] text-[#50443b] font-medium">価格 {item.priceScore}</span>}
                 {item.reviewScore !== undefined && <span className="text-sm px-3 py-1 rounded-full bg-[#f6f3f0] text-[#50443b] font-medium">レビュー {item.reviewScore}</span>}
+                {item.reviewCount !== undefined && <span className="text-sm px-3 py-1 rounded-full bg-[#f6f3f0] text-[#50443b] font-medium">{item.reviewCount}件</span>}
               </div>
               <div className="flex gap-3 mt-4">
                 <button
