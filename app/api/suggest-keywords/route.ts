@@ -21,21 +21,19 @@ export async function POST(req: NextRequest) {
 
   const safeInput = input.trim().slice(0, 100);
 
-  const prompt = `楽天市場でアフィリエイト商品を探すためのキーワードを提案してください。
+  const prompt = `楽天市場でアフィリエイト商品を探すためのキーワードを5個提案してください。
 
 ユーザーの入力: 「${safeInput}」
 
-以下のJSON形式のみで返してください。前置きや説明は不要です。
+キーワードを1行に1個、5行だけ出力してください。
+余計な説明、番号、記号は一切不要です。キーワードのみ出力してください。
 
-{
-  "keywords": ["キーワード1", "キーワード2", "キーワード3", "キーワード4", "キーワード5"]
-}
-
-ルール:
-- 楽天市場で実際に検索されそうな具体的なキーワードを5個
-- 1キーワードは2〜6文字程度
-- 季節・用途・素材など切り口を変えて提案する
-- JSONのみ出力、他のテキスト不要`;
+例：
+水着
+ビキニ
+ラッシュガード
+サーフパンツ
+日焼け止め`;
 
   try {
     const response = await fetch(
@@ -46,7 +44,7 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
-            maxOutputTokens: 200,
+            maxOutputTokens: 100,
             temperature: 0.5,
           },
         }),
@@ -54,19 +52,25 @@ export async function POST(req: NextRequest) {
     );
 
     if (!response.ok) {
+      const err = await response.text();
+      console.error('Gemini API error:', err);
       return NextResponse.json({ error: 'AI suggestion failed' }, { status: 502 });
     }
 
     const data = await response.json();
     const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-    const clean = raw.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(clean);
 
-    if (!Array.isArray(parsed.keywords)) {
-      return NextResponse.json({ error: 'Invalid AI response' }, { status: 502 });
+    const keywords = raw
+      .split('\n')
+      .map((line: string) => line.trim())
+      .filter((line: string) => line.length > 0 && line.length <= 20)
+      .slice(0, 5);
+
+    if (keywords.length === 0) {
+      return NextResponse.json({ error: 'No keywords generated' }, { status: 502 });
     }
 
-    return NextResponse.json({ keywords: parsed.keywords.slice(0, 5) });
+    return NextResponse.json({ keywords });
   } catch (err) {
     console.error('Suggest keywords error:', err);
     return NextResponse.json({ error: 'Failed to suggest keywords' }, { status: 502 });
