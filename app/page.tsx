@@ -11,6 +11,7 @@ export default function HomePage() {
   const [keyword, setKeyword] = useState('');
   const [aiInput, setAiInput] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [selectedSuggestions, setSelectedSuggestions] = useState<Set<string>>(new Set());
   const [suggesting, setSuggesting] = useState(false);
 
   function handleSearch() {
@@ -28,6 +29,7 @@ export default function HomePage() {
     if (!aiInput.trim() || suggesting) return;
     setSuggesting(true);
     setSuggestions([]);
+    setSelectedSuggestions(new Set());
     try {
       const res = await fetch('/api/suggest-keywords', {
         method: 'POST',
@@ -46,10 +48,19 @@ export default function HomePage() {
     }
   }
 
-  function handleSelectSuggestion(kw: string) {
-    setKeyword(kw);
-    setSuggestions([]);
-    setAiInput('');
+  function handleToggleSuggestion(kw: string) {
+    setSelectedSuggestions((prev) => {
+      const next = new Set(prev);
+      if (next.has(kw)) {
+        next.delete(kw);
+      } else {
+        next.add(kw);
+      }
+      // 選択中のキーワードをスペース区切りで検索窓に反映
+      const selected = suggestions.filter((s) => next.has(s));
+      setKeyword(selected.join(' '));
+      return next;
+    });
   }
 
   return (
@@ -104,19 +115,26 @@ export default function HomePage() {
 
           {suggestions.length > 0 && (
             <div className="mt-4">
-              <p className="text-xs text-[#83746a] mb-2">タップして検索キーワードに設定：</p>
+              <p className="text-xs text-[#83746a] mb-2">タップして選択・もう一度タップで解除：</p>
               <div className="flex flex-wrap gap-2">
-                {suggestions.map((kw) => (
-                  <button
-                    key={kw}
-                    type="button"
-                    onClick={() => handleSelectSuggestion(kw)}
-                    className="px-3 py-2 rounded-full text-sm font-bold border transition-all active:scale-95"
-                    style={{borderColor: '#c17f3e', color: '#8b5e34', background: 'white'}}
-                  >
-                    {kw}
-                  </button>
-                ))}
+                {suggestions.map((kw) => {
+                  const isSelected = selectedSuggestions.has(kw);
+                  return (
+                    <button
+                      key={kw}
+                      type="button"
+                      onClick={() => handleToggleSuggestion(kw)}
+                      className="px-3 py-2 rounded-full text-sm font-bold border transition-all active:scale-95"
+                      style={{
+                        borderColor: '#c17f3e',
+                        color: isSelected ? 'white' : '#8b5e34',
+                        background: isSelected ? 'linear-gradient(135deg, #c17f3e 0%, #8b5e34 100%)' : 'white',
+                      }}
+                    >
+                      {kw}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -156,7 +174,8 @@ export default function HomePage() {
             <button
               type="button"
               onClick={handleSearch}
-              className="w-full flex items-center justify-center gap-3 text-white font-bold py-5 rounded-xl active:scale-[0.98] transition-all" style={{background: "linear-gradient(135deg, #c17f3e 0%, #8b5e34 50%, #6f461f 100%)", boxShadow: "0 4px 20px rgba(139,94,52,0.4), 0 1px 0 rgba(255,255,255,0.2) inset"}}
+              className="w-full flex items-center justify-center gap-3 text-white font-bold py-5 rounded-xl active:scale-[0.98] transition-all"
+              style={{background: "linear-gradient(135deg, #c17f3e 0%, #8b5e34 50%, #6f461f 100%)", boxShadow: "0 4px 20px rgba(139,94,52,0.4), 0 1px 0 rgba(255,255,255,0.2) inset"}}
             >
               候補を探す →
             </button>
