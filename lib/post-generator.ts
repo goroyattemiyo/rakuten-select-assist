@@ -14,8 +14,8 @@ export function generatePostText(item: SavedItem): string {
     review || rating ? `⭐ ${[rating, review].filter(Boolean).join('　')}` : '',
     ``,
     `👇 楽天で詳細を見る`,
-    item.itemUrl,
-  ].filter((line) => line !== undefined && line !== null);
+    `（リンクはプロフィールから）`,
+  ].filter((line) => line !== undefined && line !== null && line !== '');
 
   return lines.join('\n');
 }
