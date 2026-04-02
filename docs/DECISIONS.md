@@ -83,3 +83,21 @@
 - scoring.ts: スコアリング
 - types.ts: 型定義
 - genre-catalog.ts: ジャンル一覧
+
+---
+
+## 2026-04-02: AI機能実装（Gemini API）
+
+### 実装内容
+- AI投稿文生成：`app/api/generate-post/route.ts`
+- AIキーワード提案：`app/api/suggest-keywords/route.ts`
+
+### 技術判断
+- GeminiAPIを採用（無料枠あり）
+- モデル：`gemini-2.5-flash-lite`（安定・高速・1日1000リクエスト）
+- `gemini-2.5-flash`は無料枠20回/日で不足、タイムアウトも発生
+- キーワード提案はJSON形式をやめてプレーンテキストでパース
+- Vercelタイムアウト対策：`vercel.json`で30秒に延長
+
+### 環境変数
+- `GEMINI_API_KEY`：Vercel・`.env.local`両方に設定済み
