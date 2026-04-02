@@ -64,7 +64,7 @@ export default function SavedPage() {
               </div>
               <div className="flex gap-3">
                 
-                  href={item.itemUrl}
+                  <a href={item.itemUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 text-white font-bold py-3 rounded-xl text-sm text-center block transition-all active:scale-95"
