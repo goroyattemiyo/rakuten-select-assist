@@ -24,6 +24,8 @@ export function scoreProducts(items: ProductCandidate[]): ProductCandidate[] {
       return {
         ...item,
         score: Math.round(baseScore * 10) / 10,
+        priceScore: Math.round(priceScore * 10) / 10,
+        reviewScore: Math.round(reviewScore * 10) / 10,
       };
     })
     .sort((a, b) => (b.score ?? 0) - (a.score ?? 0));

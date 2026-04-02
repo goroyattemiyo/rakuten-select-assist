@@ -8,6 +8,8 @@ export type ProductCandidate = {
   reviewCount?: number;
   reviewAverage?: number;
   score?: number;
+  priceScore?: number;
+  reviewScore?: number;
   reasons?: string[];
 };
 

@@ -31,8 +31,8 @@ export default function ResultsPage() {
   }, [keyword, genre]);
 
   return (
-    <div className="min-h-screen bg-[#fcf9f6]">
-      <header className="fixed top-0 w-full z-50 bg-[#fcf9f6] flex items-center justify-between px-6 h-16">
+    <div className="min-h-screen" style={{background: "linear-gradient(135deg, #fff8f0 0%, #fef3e2 40%, #fde8c8 100%)"}}>
+      <header className="fixed top-0 w-full z-50 flex items-center justify-between px-6 h-16 backdrop-blur-md" style={{background: "rgba(255,248,240,0.85)"}}>
         <h1 className="text-lg font-bold text-[#8b5e34] tracking-tight">Rakuten Select</h1>
         <button
           type="button"
@@ -45,13 +45,14 @@ export default function ResultsPage() {
 
       <main className="pt-24 pb-32 px-6 max-w-2xl mx-auto">
         <section className="mb-8">
-          <h2 className="text-2xl font-extrabold text-[#1b1c1a] mb-2">おすすめ候補</h2>
-          <p className="text-[#50443b] text-sm">
-            {keyword && <span>「{keyword}」</span>}
-            {genre && keyword && <span> × </span>}
-            {genre && <span>ジャンル指定</span>}
-            の検索結果です。
-          </p>
+          <h2 className="text-2xl font-extrabold text-[#1b1c1a] mb-2">選定候補</h2>
+          <div className="mt-2 px-4 py-3 rounded-xl bg-white/60 backdrop-blur-sm border border-[#e8ddd4] text-sm text-[#50443b]">
+            <span className="font-bold">検索条件：</span>
+            {keyword && <span>キーワード「{keyword}」</span>}
+            {keyword && genre && <span>　×　</span>}
+            {genre && <span>ジャンル指定あり</span>}
+            <span>　でスコアリングした結果です。レビュー数・価格帯を軸に上位を抽出しています。</span>
+          </div>
         </section>
 
         {loading && (
@@ -89,8 +90,8 @@ export default function ResultsPage() {
 
         <div className="space-y-4">
           {items.map((item, index) => (
-            <article key={item.id} className="bg-white rounded-2xl p-5 shadow-sm">
-              <p className="text-xs font-bold text-[#8b5e34] mb-3">候補 {index + 1}</p>
+            <article key={item.id} className="rounded-2xl p-5" style={{background: "linear-gradient(160deg, #ffffff 0%, #fff8f0 100%)", boxShadow: "0 8px 32px rgba(139,94,52,0.1), inset 0 1px 0 rgba(255,255,255,0.9)"}}>
+              <p className="text-xs font-bold text-[#8b5e34] mb-3">選定候補 {index + 1}</p>
               <div className="flex gap-4">
                 {item.imageUrl && (
                   <img
@@ -109,13 +110,34 @@ export default function ResultsPage() {
                   )}
                 </div>
               </div>
-              {item.reasons && item.reasons.length > 0 && (
-                <p className="mt-3 text-sm text-[#50443b] leading-relaxed">{item.reasons[0]}</p>
-              )}
+              <div className="mt-3 flex gap-3 flex-wrap">
+                  {item.score !== undefined && (
+                    <span className="text-base font-bold px-3 py-1 rounded-full" style={{background: "linear-gradient(135deg, #c17f3e, #8b5e34)", color: "white"}}>
+                      総合 {item.score}
+                    </span>
+                  )}
+                  {item.priceScore !== undefined && (
+                    <span className="text-sm px-3 py-1 rounded-full bg-[#f6f3f0] text-[#50443b] font-medium">
+                      価格 {item.priceScore}
+                    </span>
+                  )}
+                  {item.reviewScore !== undefined && (
+                    <span className="text-sm px-3 py-1 rounded-full bg-[#f6f3f0] text-[#50443b] font-medium">
+                      レビュー {item.reviewScore}
+                    </span>
+                  )}
+                </div>
+                {item.reasons && item.reasons.length > 0 && (
+                  <div className="mt-2">
+                    {item.reasons.map((reason, i) => (
+                      <p key={i} className="text-sm text-[#50443b] leading-relaxed">・{reason}</p>
+                    ))}
+                  </div>
+                )}
               <div className="flex gap-3 mt-4">
                 <button
                   type="button"
-                  className="flex-1 bg-gradient-to-br from-[#6f461f] to-[#8b5e34] text-white font-bold py-3 rounded-xl text-sm"
+                  className="flex-1 text-white font-bold py-3 rounded-xl text-sm" style={{background: "linear-gradient(135deg, #c17f3e 0%, #8b5e34 50%, #6f461f 100%)", boxShadow: "0 4px 16px rgba(139,94,52,0.35), inset 0 1px 0 rgba(255,255,255,0.2)"}}
                 >
                   保存する
                 </button>
@@ -125,7 +147,7 @@ export default function ResultsPage() {
                   rel="noopener noreferrer"
                   className="flex-1 bg-[#eae8e5] text-[#1b1c1a] font-bold py-3 rounded-xl text-sm text-center"
                 >
-                  詳細を見る
+                  楽天で確認する
                 </a>
               </div>
             </article>
