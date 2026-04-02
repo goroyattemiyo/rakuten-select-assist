@@ -73,6 +73,9 @@ ${reviewInfo ? `レビュー: ${reviewInfo}` : ''}
             maxOutputTokens: 400,
             temperature: 0.7,
           },
+          thinkingConfig: {
+            thinkingBudget: 0
+          },
         }),
       }
     );

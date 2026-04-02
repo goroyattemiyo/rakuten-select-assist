@@ -44,8 +44,11 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
-            maxOutputTokens: 500,
+            maxOutputTokens: 200,
             temperature: 0.5,
+          },
+          thinkingConfig: {
+            thinkingBudget: 0,
           },
         }),
       }
