@@ -1,11 +1,11 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ProductCandidate } from '@/lib/types';
 
-export default function ResultsPage() {
+function ResultsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const keyword = searchParams.get('keyword') ?? '';
@@ -156,5 +156,13 @@ export default function ResultsPage() {
       </main>
 
       </div>
+  );
+}
+
+export default function ResultsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p className="text-[#50443b]">読み込み中...</p></div>}>
+      <ResultsContent />
+    </Suspense>
   );
 }
