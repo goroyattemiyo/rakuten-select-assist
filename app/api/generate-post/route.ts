@@ -34,10 +34,7 @@ export async function POST(req: NextRequest) {
   const safeReviewAverage = typeof reviewAverage === 'number' ? reviewAverage : null;
   const safeTone = tone === 'polite' ? 'polite' : 'casual';
 
-  const toneInstruction =
-    safeTone === 'polite'
-      ? '丁寧で信頼感のある文体'
-      : 'フレンドリーで親しみやすい文体';
+  const toneInstruction = safeTone === 'polite' ? '丁寧で信頼感のある文体' : 'フレンドリーで親しみやすい文体';
 
   const reviewInfo =
     safeReviewCount && safeReviewAverage
@@ -46,36 +43,34 @@ export async function POST(req: NextRequest) {
       ? `レビュー${safeReviewCount}件`
       : '';
 
-  const prompt = `あなたは楽天アフィリエイターです。以下の商品情報をもとに、SNS（Threads・X）向けの日本語投稿文を作成してください。
+  const prompt = `楽天アフィリエイターとして、以下の商品のSNS投稿文を日本語で作成してください。
 
-【商品名（長い場合は要点だけ抽出してOK）】
-${safeName}
+商品名（長い場合は要点を抽出）: ${safeName}
+価格: ¥${safePrice.toLocaleString()}
+${reviewInfo ? `レビュー: ${reviewInfo}` : ''}
+文体: ${toneInstruction}
 
-【価格】¥${safePrice.toLocaleString()}
-【レビュー情報】${reviewInfo || 'なし'}
-【文体】${toneInstruction}
+必須ルール:
+1. 必ず文章を完結させること（途中で切らない）
+2. 全体で100文字以上180文字以内
+3. 絵文字を2〜3個使う
+4. 末尾に「リンクはプロフィールから」を入れる
+5. ハッシュタグを2個、最後に置く
+6. 商品名をそのままコピーしない
+7. URLは含めない
 
-【出力ルール】
-- 完結した文章で終わること（途中で切れないこと）
-- 200文字以内
-- 絵文字を2〜4個使う
-- 「リンクはプロフィールから」を末尾に入れる
-- ハッシュタグを2〜3個、末尾にまとめる
-- 商品名をそのままコピーしない。魅力を自分の言葉で伝える
-- URLは含めない
-
-投稿文のみ出力してください。`;
+投稿文のみ出力:`;
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
-            maxOutputTokens: 500,
+            maxOutputTokens: 400,
             temperature: 0.7,
           },
         }),
@@ -95,8 +90,7 @@ ${safeName}
       return NextResponse.json({ error: 'Empty response from AI' }, { status: 502 });
     }
 
-    const trimmed = generated.trim().slice(0, 600);
-    return NextResponse.json({ text: trimmed });
+    return NextResponse.json({ text: generated.trim() });
   } catch (err) {
     console.error('Gemini fetch error:', err);
     return NextResponse.json({ error: 'Network error' }, { status: 502 });

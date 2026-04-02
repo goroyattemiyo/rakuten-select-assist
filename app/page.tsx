@@ -9,6 +9,9 @@ export default function HomePage() {
   const router = useRouter();
   const [genre, setGenre] = useState('');
   const [keyword, setKeyword] = useState('');
+  const [aiInput, setAiInput] = useState('');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggesting, setSuggesting] = useState(false);
 
   function handleSearch() {
     if (!keyword.trim() && !genre) {
@@ -19,6 +22,34 @@ export default function HomePage() {
     if (keyword.trim()) params.set('keyword', keyword.trim());
     if (genre) params.set('genre', genre);
     router.push(`/results?${params.toString()}`);
+  }
+
+  async function handleSuggest() {
+    if (!aiInput.trim() || suggesting) return;
+    setSuggesting(true);
+    setSuggestions([]);
+    try {
+      const res = await fetch('/api/suggest-keywords', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input: aiInput.trim() }),
+      });
+      if (!res.ok) throw new Error('failed');
+      const data = await res.json();
+      if (Array.isArray(data.keywords)) {
+        setSuggestions(data.keywords);
+      }
+    } catch {
+      // 失敗時は何も表示しない
+    } finally {
+      setSuggesting(false);
+    }
+  }
+
+  function handleSelectSuggestion(kw: string) {
+    setKeyword(kw);
+    setSuggestions([]);
+    setAiInput('');
   }
 
   return (
@@ -44,6 +75,54 @@ export default function HomePage() {
           </p>
         </section>
 
+        {/* AI キーワード提案 */}
+        <section className="rounded-2xl p-6 mb-6" style={{background: "linear-gradient(160deg, #ffffff 0%, #fff8f0 100%)", boxShadow: "0 8px 32px rgba(139,94,52,0.12), inset 0 1px 0 rgba(255,255,255,0.9)"}}>
+          <p className="text-sm font-bold text-[#50443b] mb-3">✨ AIにキーワードを提案してもらう</p>
+          <p className="text-xs text-[#83746a] mb-4">「今日紹介したい商品のイメージ」を自由に入力してください</p>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={aiInput}
+              onChange={(e) => setAiInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSuggest()}
+              placeholder="例: 夏に使える日焼け止め、プレゼントに喜ばれるもの"
+              className="flex-1 bg-[#eae8e5] border-none rounded-xl px-4 py-3 text-sm text-[#1b1c1a] placeholder:text-[#83746a] font-medium focus:outline-none focus:ring-2 focus:ring-[#8b5e34]"
+            />
+            <button
+              type="button"
+              onClick={handleSuggest}
+              disabled={suggesting || !aiInput.trim()}
+              className="px-4 py-3 rounded-xl text-sm font-bold text-white transition-all active:scale-95"
+              style={{
+                background: suggesting || !aiInput.trim() ? '#c8b49a' : 'linear-gradient(135deg, #c17f3e 0%, #8b5e34 100%)',
+                cursor: suggesting || !aiInput.trim() ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {suggesting ? '…' : '提案'}
+            </button>
+          </div>
+
+          {suggestions.length > 0 && (
+            <div className="mt-4">
+              <p className="text-xs text-[#83746a] mb-2">タップして検索キーワードに設定：</p>
+              <div className="flex flex-wrap gap-2">
+                {suggestions.map((kw) => (
+                  <button
+                    key={kw}
+                    type="button"
+                    onClick={() => handleSelectSuggestion(kw)}
+                    className="px-3 py-2 rounded-full text-sm font-bold border transition-all active:scale-95"
+                    style={{borderColor: '#c17f3e', color: '#8b5e34', background: 'white'}}
+                  >
+                    {kw}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* 検索フォーム */}
         <section className="rounded-2xl p-8 mb-10" style={{background: "linear-gradient(160deg, #ffffff 0%, #fff8f0 100%)", boxShadow: "0 8px 32px rgba(139,94,52,0.12), inset 0 1px 0 rgba(255,255,255,0.9)"}}>
           <div className="space-y-8">
             <div className="space-y-3">
@@ -68,7 +147,8 @@ export default function HomePage() {
                 type="text"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
-                placeholder="例: 秋物 ワンピース, オーガニック"
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                placeholder="例: 秋物 ワンピース、オーガニック"
                 className="w-full bg-[#eae8e5] border-none rounded-xl px-5 py-4 text-[#1b1c1a] placeholder:text-[#83746a] font-medium focus:outline-none focus:ring-2 focus:ring-[#8b5e34]"
               />
             </div>
@@ -83,7 +163,6 @@ export default function HomePage() {
           </div>
         </section>
       </main>
-
-      </div>
+    </div>
   );
 }
