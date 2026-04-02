@@ -4,6 +4,8 @@ export type SavedItem = {
   price: number;
   itemUrl: string;
   savedAt: string;
+  reviewCount?: number;
+  reviewAverage?: number;
 };
 
 const STORAGE_KEY = 'rakuten-select-saved-items';

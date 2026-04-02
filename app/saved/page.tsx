@@ -49,7 +49,19 @@ export default function SavedPage() {
             <article key={item.id} className="rounded-2xl p-5" style={{background: "linear-gradient(160deg, #ffffff 0%, #fff8f0 100%)", boxShadow: "0 8px 32px rgba(139,94,52,0.1), inset 0 1px 0 rgba(255,255,255,0.9)"}}>
               <p className="text-sm font-bold text-[#1b1c1a] leading-snug mb-2">{item.name}</p>
               <p className="text-[#8b5e34] font-bold mb-1">¥{item.price.toLocaleString()}</p>
-              <p className="text-xs text-[#83746a] mb-4">{new Date(item.savedAt).toLocaleDateString('ja-JP')}</p>
+              <div className="flex gap-3 items-center mb-4">
+                {item.reviewCount !== undefined && (
+                  <span className="text-xs px-2 py-1 rounded-full bg-[#f6f3f0] text-[#50443b] font-medium">
+                    レビュー {item.reviewCount}件
+                  </span>
+                )}
+                {item.reviewAverage !== undefined && item.reviewAverage > 0 && (
+                  <span className="text-xs px-2 py-1 rounded-full bg-[#f6f3f0] text-[#50443b] font-medium">
+                    ★ {item.reviewAverage}
+                  </span>
+                )}
+                <p className="text-xs text-[#83746a]">{new Date(item.savedAt).toLocaleDateString('ja-JP')}</p>
+              </div>
               <div className="flex gap-3">
                 
                   href={item.itemUrl}

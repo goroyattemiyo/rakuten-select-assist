@@ -38,6 +38,8 @@ function ResultsContent() {
       price: item.price,
       itemUrl: item.itemUrl,
       savedAt: new Date().toISOString(),
+      reviewCount: item.reviewCount,
+      reviewAverage: item.reviewAverage,
     });
     setSavedIds((prev) => new Set(prev).add(item.id));
   }
