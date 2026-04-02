@@ -1,13 +1,14 @@
 'use client';
-import Image from 'next/image';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSavedItems, removeItem, SavedItem } from '@/lib/saved-items';
+import { generatePostText } from '@/lib/post-generator';
 
 export default function SavedPage() {
   const router = useRouter();
   const [items, setItems] = useState<SavedItem[]>([]);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
     setItems(getSavedItems());
@@ -18,10 +19,21 @@ export default function SavedPage() {
     setItems(getSavedItems());
   }
 
+  function handleCopy(item: SavedItem) {
+    const text = generatePostText(item);
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedId(item.id);
+      setTimeout(() => setCopiedId(null), 2000);
+    });
+  }
+
   return (
     <div className="min-h-screen" style={{background: "linear-gradient(135deg, #fff8f0 0%, #fef3e2 40%, #fde8c8 100%)"}}>
       <header className="fixed top-0 w-full z-50 flex items-center justify-between px-6 h-16 backdrop-blur-md" style={{background: "rgba(255,248,240,0.85)"}}>
-        <h1 className="text-lg font-bold text-[#8b5e34] tracking-tight">保存済み候補</h1>
+        <div className="flex items-center gap-2">
+          <img src="/icon.png" alt="icon" width={28} height={28} style={{borderRadius: 8}} />
+          <h1 className="text-lg font-bold text-[#8b5e34] tracking-tight">Rakuten Select Assist</h1>
+        </div>
         <button
           type="button"
           onClick={() => router.back()}
@@ -63,22 +75,29 @@ export default function SavedPage() {
                 )}
                 <p className="text-xs text-[#83746a]">{new Date(item.savedAt).toLocaleDateString('ja-JP')}</p>
               </div>
+
+              <div className="bg-[#f6f3f0] rounded-xl p-4 mb-4 text-sm text-[#50443b] whitespace-pre-wrap leading-relaxed">
+                {generatePostText(item)}
+              </div>
+
               <div className="flex gap-3">
-                
-                  <a href={item.itemUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 text-white font-bold py-3 rounded-xl text-sm text-center block transition-all active:scale-95"
-                  style={{background: "linear-gradient(135deg, #c17f3e 0%, #8b5e34 50%, #6f461f 100%)"}}
+                <button
+                  type="button"
+                  onClick={() => handleCopy(item)}
+                  className="flex-1 text-white font-bold py-3 rounded-xl text-sm transition-all active:scale-95"
+                  style={{background: copiedId === item.id ? '#6b9e6b' : 'linear-gradient(135deg, #c17f3e 0%, #8b5e34 50%, #6f461f 100%)'}}
                 >
-                  楽天で確認する
+                  {copiedId === item.id ? 'コピーしました ✓' : '投稿文をコピー'}
+                </button>
+                <a href={item.itemUrl} target="_blank" rel="noopener noreferrer" className="flex-1 text-white font-bold py-3 rounded-xl text-sm text-center block transition-all active:scale-95" style={{background: "#8b5e34"}}>
+                  楽天で確認
                 </a>
                 <button
                   type="button"
                   onClick={() => handleRemove(item.id)}
                   className="flex-1 bg-[#eae8e5] text-[#1b1c1a] font-bold py-3 rounded-xl text-sm transition-all active:scale-95"
                 >
-                  削除する
+                  削除
                 </button>
               </div>
             </article>
