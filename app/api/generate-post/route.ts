@@ -36,32 +36,35 @@ export async function POST(req: NextRequest) {
 
   const toneInstruction =
     safeTone === 'polite'
-      ? '丁寧でフォーマルな文体で書いてください。'
-      : 'フレンドリーでカジュアルな文体で書いてください。';
+      ? '丁寧で信頼感のある文体'
+      : 'フレンドリーで親しみやすい文体';
 
   const reviewInfo =
     safeReviewCount && safeReviewAverage
-      ? `レビュー数: ${safeReviewCount}件、平均評価: ${safeReviewAverage}`
+      ? `レビュー${safeReviewCount}件・平均${safeReviewAverage}点`
       : safeReviewCount
-      ? `レビュー数: ${safeReviewCount}件`
-      : '（レビュー情報なし）';
+      ? `レビュー${safeReviewCount}件`
+      : '';
 
-  const prompt = `あなたは楽天アフィリエイターのSNS投稿文ライターです。
-以下の商品情報をもとに、SNS（Threads・X）向けの紹介投稿文を日本語で作成してください。
+  const prompt = `あなたは楽天アフィリエイターです。以下の商品情報をもとに、SNS（Threads・X）向けの日本語投稿文を作成してください。
 
-【商品名】${safeName}
+【商品名（長い場合は要点だけ抽出してOK）】
+${safeName}
+
 【価格】¥${safePrice.toLocaleString()}
-【レビュー情報】${reviewInfo}
+【レビュー情報】${reviewInfo || 'なし'}
+【文体】${toneInstruction}
 
-【ルール】
-- ${toneInstruction}
-- 絵文字を適度に使う
-- 150文字以内に収める
-- URLやリンクは含めない。代わりに「リンクはプロフィールから」と書く
-- ハッシュタグは2〜3個まで
-- 商品の魅力が伝わるような自然な文章にする
+【出力ルール】
+- 完結した文章で終わること（途中で切れないこと）
+- 200文字以内
+- 絵文字を2〜4個使う
+- 「リンクはプロフィールから」を末尾に入れる
+- ハッシュタグを2〜3個、末尾にまとめる
+- 商品名をそのままコピーしない。魅力を自分の言葉で伝える
+- URLは含めない
 
-投稿文のみを出力してください。前置きや説明は不要です。`;
+投稿文のみ出力してください。`;
 
   try {
     const response = await fetch(
@@ -72,8 +75,8 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
-            maxOutputTokens: 300,
-            temperature: 0.8,
+            maxOutputTokens: 500,
+            temperature: 0.7,
           },
         }),
       }
@@ -92,7 +95,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Empty response from AI' }, { status: 502 });
     }
 
-    const trimmed = generated.trim().slice(0, 500);
+    const trimmed = generated.trim().slice(0, 600);
     return NextResponse.json({ text: trimmed });
   } catch (err) {
     console.error('Gemini fetch error:', err);
