@@ -63,7 +63,7 @@ ${reviewInfo ? `レビュー: ${reviewInfo}` : ''}
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite-preview-06-17:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -73,8 +73,6 @@ ${reviewInfo ? `レビュー: ${reviewInfo}` : ''}
             maxOutputTokens: 400,
             temperature: 0.7,
           },
-          thinkingConfig: {
-            thinkingBudget: 0
           },
         }),
       }
