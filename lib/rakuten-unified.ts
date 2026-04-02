@@ -17,7 +17,7 @@ export async function searchRakutenItemsUnified(params: {
   const { keyword, genreId } = params;
 
   // keyword も genreId も空ならエラー
-  if (!keyword && !genreId) {
+  if (!keyword && genreId === undefined) {
     throw new Error('keyword または genreId のいずれかが必要です。');
   }
 
@@ -40,6 +40,7 @@ export async function searchRakutenItemsUnified(params: {
     hits: '20',
     imageFlag: '1',
     availability: '1',
+    hasReviewFlag: '1',
     sort: '-reviewCount',
   });
 
@@ -47,7 +48,7 @@ export async function searchRakutenItemsUnified(params: {
     query.set('keyword', keyword.trim());
   }
 
-  if (genreId) {
+  if (genreId !== undefined) {
     query.set('genreId', String(genreId));
   }
 
@@ -55,7 +56,7 @@ export async function searchRakutenItemsUnified(params: {
     query.set('affiliateId', process.env.RAKUTEN_AFFILIATE_ID);
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const appUrl = process.env.APP_URL || 'http://localhost:3000';
   const referer = appUrl.endsWith('/') ? appUrl : `${appUrl}/`;
 
   const response = await fetch(`${BASE_URL}?${query.toString()}`, {
