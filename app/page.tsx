@@ -10,6 +10,10 @@ export default function HomePage() {
   const [keyword, setKeyword] = useState('');
 
   function handleSearch() {
+    if (!keyword.trim() && !genre) {
+      alert('ジャンルまたはキーワードを入力してください。');
+      return;
+    }
     const params = new URLSearchParams();
     if (keyword.trim()) params.set('keyword', keyword.trim());
     if (genre) params.set('genre', genre);
@@ -72,18 +76,6 @@ export default function HomePage() {
             >
               候補を探す →
             </button>
-          </div>
-        </section>
-
-        <section className="grid grid-cols-2 gap-4">
-          <div className="bg-[#f6f3f0] rounded-xl p-6 flex flex-col justify-between aspect-square relative overflow-hidden">
-            <div>
-              <h3 className="font-bold text-[#1b1c1a] mb-1">効率的な選定</h3>
-              <p className="text-xs text-[#50443b] leading-relaxed">膨大な商品データから最適な候補を瞬時に抽出します。</p>
-            </div>
-          </div>
-          <div className="bg-[#eae8e5] rounded-xl aspect-square flex items-center justify-center">
-            <p className="text-[#50443b] text-xs font-bold text-center px-4">スコアリングで<br/>最適な商品を提案</p>
           </div>
         </section>
       </main>
