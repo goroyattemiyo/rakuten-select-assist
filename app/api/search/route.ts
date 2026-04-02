@@ -1,19 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { searchRakutenItems } from '@/lib/rakuten';
-import { buildReasons } from '@/lib/reason';
+import { searchRakutenItemsUnified } from '@/lib/rakuten-unified';
 import { scoreProducts } from '@/lib/scoring';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const keyword = searchParams.get('keyword') ?? undefined;
-  const genre = searchParams.get('genre') ?? undefined;
+  const genreParam = searchParams.get('genre');
+  const genreId = genreParam ? Number(genreParam) : undefined;
 
   try {
-    const rawItems = await searchRakutenItems({ keyword, genre });
-    const scoredItems = scoreProducts(rawItems).map((item) => ({
-      ...item,
-      reasons: buildReasons(item),
-    }));
+    const rawItems = await searchRakutenItemsUnified({ keyword, genreId });
+    const scoredItems = scoreProducts(rawItems);
 
     return NextResponse.json({
       items: scoredItems,
