@@ -34,13 +34,22 @@ function ResultsContent() {
     <div className="min-h-screen" style={{background: "linear-gradient(135deg, #fff8f0 0%, #fef3e2 40%, #fde8c8 100%)"}}>
       <header className="fixed top-0 w-full z-50 flex items-center justify-between px-6 h-16 backdrop-blur-md" style={{background: "rgba(255,248,240,0.85)"}}>
         <h1 className="text-lg font-bold text-[#8b5e34] tracking-tight">Rakuten Select</h1>
-        <button
-          type="button"
-          onClick={() => router.push('/')}
-          className="text-sm font-bold text-[#8b5e34] border border-[#8b5e34] px-4 py-2 rounded-full"
-        >
-          再検索
-        </button>
+<div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => router.push('/saved')}
+            className="text-sm font-bold text-[#8b5e34] border border-[#8b5e34] px-4 py-2 rounded-full"
+          >
+            保存済み
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push('/')}
+            className="text-sm font-bold text-[#8b5e34] border border-[#8b5e34] px-4 py-2 rounded-full"
+          >
+            再検索
+          </button>
+        </div>
       </header>
 
       <main className="pt-24 pb-32 px-6 max-w-2xl mx-auto">

@@ -21,8 +21,8 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fcf9f6] font-[Manrope,sans-serif]">
-      <header className="fixed top-0 w-full z-50 bg-[#fcf9f6] flex items-center justify-between px-6 h-16">
+    <div className="min-h-screen font-[Manrope,sans-serif]" style={{background: "linear-gradient(135deg, #fff8f0 0%, #fef3e2 40%, #fde8c8 100%)"}}>
+      <header className="fixed top-0 w-full z-50 flex items-center justify-between px-6 h-16 backdrop-blur-md" style={{background: "rgba(255,248,240,0.85)"}}>
         <h1 className="text-lg font-bold text-[#8b5e34] tracking-tight">Rakuten Select</h1>
       </header>
 
@@ -40,7 +40,7 @@ export default function HomePage() {
           </p>
         </section>
 
-        <section className="bg-white rounded-2xl p-8 shadow-sm mb-10">
+        <section className="rounded-2xl p-8 mb-10" style={{background: "linear-gradient(160deg, #ffffff 0%, #fff8f0 100%)", boxShadow: "0 8px 32px rgba(139,94,52,0.12), inset 0 1px 0 rgba(255,255,255,0.9)"}}>
           <div className="space-y-8">
             <div className="space-y-3">
               <label className="block text-sm font-bold text-[#50443b]">ジャンルを選択</label>
@@ -72,7 +72,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={handleSearch}
-              className="w-full flex items-center justify-center gap-3 bg-gradient-to-br from-[#6f461f] to-[#8b5e34] text-white font-bold py-5 rounded-xl shadow-lg active:scale-[0.98] transition-all"
+              className="w-full flex items-center justify-center gap-3 text-white font-bold py-5 rounded-xl active:scale-[0.98] transition-all" style={{background: "linear-gradient(135deg, #c17f3e 0%, #8b5e34 50%, #6f461f 100%)", boxShadow: "0 4px 20px rgba(139,94,52,0.4), 0 1px 0 rgba(255,255,255,0.2) inset"}}
             >
               候補を探す →
             </button>
