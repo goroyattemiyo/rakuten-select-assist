@@ -2,7 +2,7 @@
 import Image from 'next/image';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { genreCatalog } from '@/lib/genre-catalog';
 
 export default function HomePage() {
@@ -13,6 +13,16 @@ export default function HomePage() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [selectedSuggestions, setSelectedSuggestions] = useState<Set<string>>(new Set());
   const [suggesting, setSuggesting] = useState(false);
+  const [trendHint, setTrendHint] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/trend-hint')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.hint) setTrendHint(data.hint);
+      })
+      .catch(() => {});
+  }, []);
 
   function handleSearch() {
     if (!keyword.trim() && !genre) {
@@ -56,7 +66,6 @@ export default function HomePage() {
       } else {
         next.add(kw);
       }
-      // 選択中のキーワードをスペース区切りで検索窓に反映
       const selected = suggestions.filter((s) => next.has(s));
       setKeyword(selected.join(' '));
       return next;
@@ -88,7 +97,18 @@ export default function HomePage() {
 
         {/* AI キーワード提案 */}
         <section className="rounded-2xl p-6 mb-6" style={{background: "linear-gradient(160deg, #ffffff 0%, #fff8f0 100%)", boxShadow: "0 8px 32px rgba(139,94,52,0.12), inset 0 1px 0 rgba(255,255,255,0.9)"}}>
-          <p className="text-sm font-bold text-[#50443b] mb-3">✨ AIにキーワードを提案してもらう</p>
+          <p className="text-sm font-bold text-[#50443b] mb-1">✨ AIにキーワードを提案してもらう</p>
+
+          {/* トレンドヒント */}
+          {trendHint && (
+            <p className="text-xs text-[#c17f3e] font-medium mb-3 leading-relaxed">
+              💡 {trendHint}
+            </p>
+          )}
+          {!trendHint && (
+            <p className="text-xs text-[#c8b49a] mb-3">💡 今日のヒントを読み込み中...</p>
+          )}
+
           <p className="text-xs text-[#83746a] mb-4">「今日紹介したい商品のイメージ」を自由に入力してください</p>
           <div className="flex gap-2">
             <input
