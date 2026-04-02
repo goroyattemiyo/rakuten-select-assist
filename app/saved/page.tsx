@@ -52,12 +52,12 @@ export default function SavedPage() {
               <p className="text-xs text-[#83746a] mb-4">{new Date(item.savedAt).toLocaleDateString('ja-JP')}</p>
               <div className="flex gap-3">
                 
+                  <a
                   href={item.itemUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 text-white font-bold py-3 rounded-xl text-sm text-center"
-                  style={{background: "linear-gradient(135deg, #c17f3e 0%, #8b5e34 50%, #6f461f 100%)"}}
-                >
+                  className="flex-1 text-white font-bold py-3 rounded-xl text-sm text-center block"
+                  style={{background: "linear-gradient(135deg, #c17f3e 0%, #8b5e34 50%, #6f461f 100%)"}}>
                   楽天で確認する
                 </a>
                 <button
